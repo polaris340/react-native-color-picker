@@ -1,5 +1,5 @@
 import tinycolor from 'tinycolor2'
-import { PanResponder } from 'react-native'
+import { PanResponder, Platform } from 'react-native'
 
 /**
  * Converts color to hsv representation.
@@ -20,6 +20,13 @@ export function fromHsv(hsv) {
 }
 
 const fn = () => true;
+
+const evtStateToCoords = (evt, state) => {
+  return {
+    x: evt.nativeEvent.locationX + (Platform.OS === 'android' ? state.dx : 0),
+    y: evt.nativeEvent.locationY + (Platform.OS === 'android' ? state.dy : 0)
+  }
+};
 /**
  * Simplified pan responder wrapper.
  */
@@ -31,13 +38,13 @@ export function createPanResponder({ onStart = fn, onMove = fn, onEnd = fn }) {
     onMoveShouldSetPanResponderCapture: fn,
     onPanResponderTerminationRequest: fn,
     onPanResponderGrant: (evt, state) => {
-      return onStart({ x: evt.nativeEvent.locationX, y: evt.nativeEvent.locationY }, evt, state)
+      return onStart(evtStateToCoords(evt, state), evt, state)
     },
     onPanResponderMove: (evt, state) => {
-      return onMove({ x: evt.nativeEvent.locationX, y: evt.nativeEvent.locationY }, evt, state)
+      return onMove(evtStateToCoords(evt, state), evt, state)
     },
     onPanResponderRelease: (evt, state) => {
-      return onEnd({ x: evt.nativeEvent.locationX, y: evt.nativeEvent.locationY }, evt, state)
+      return onEnd(evtStateToCoords(evt, state), evt, state)
     },
   })
 }
